@@ -77,6 +77,7 @@
             // Update the marker's value attribute
             const marker = document.querySelector('a-marker');
             marker.setAttribute('value', currentQrValue);
+            customLog('a-marker value = :', marker.getAttribute('value'));
 
             // Trigger model update
             updateModel(currentQrValue);
@@ -97,9 +98,9 @@
         }
         const newModel = document.createElement('a-entity');
         newModel.setAttribute('gltf-model', modelPath);
-        newModel.setAttribute('scale', '0.2 0.2 0.2');
-        newModel.setAttribute('position', '0 0.1 0');
-        newModel.setAttribute('rotation', '-90 0 0');
+        newModel.setAttribute('scale', '1 2 1');
+        newModel.setAttribute('position', '0 0 0');
+        newModel.setAttribute('rotation', '0 0 0');
         modelEntity.appendChild(newModel);
         // customLog('Updated model to:', modelPath);
       }
@@ -122,7 +123,7 @@
 
 <body style="margin: 0; overflow: hidden;">
   <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
-    <a-marker type="pattern" preset="custom" url="./pattern.patt" value="box" markerhandler>
+    <a-marker type="pattern" preset="custom" url="./pattern.patt" markerhandler>
       <a-entity id="ar-model" position="0 0 0" rotation="0 0 0">
       </a-entity>
     </a-marker>
