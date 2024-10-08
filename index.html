@@ -3,26 +3,10 @@
 
 <head>
   <title>AR.js QR Code Scanner with Models</title>
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <style>
-    #debugPanel {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 14px;
-      z-index: 1000;
-      max-height: 200px;
-      overflow-y: auto;
-      width: 80%;
-      border-radius: 5px;
-    }
-
     #qr-reader {
       position: fixed;
       top: 20px;
@@ -32,35 +16,47 @@
       background: rgba(0, 0, 0, 0.7);
       border-radius: 5px;
     }
+
+    .round-button {
+      padding: 10px;
+      border: none;
+      border-radius: 50%;
+      background-color: #dba316;
+      color: white;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 16px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s, background-color 0.3s;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .round-button:active {
+      transform: scale(0.9);
+    }
+
+    .round-button:focus {
+      outline: none;
+    }
+
+    .button-container {
+      position: absolute;
+      bottom: 20px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
   </style>
   <script>
-    let debugLog = [];
-    const maxLogs = 10;
     let currentQrValue;
 
-    function updateDebugPanel() {
-      const debugPanel = document.getElementById('debugPanel');
-      debugPanel.innerHTML = debugLog.join('<br>');
-      debugPanel.scrollTop = debugPanel.scrollHeight;
-    }
-
-    function customLog(...args) {
-      const message = args.join(' ');
-      debugLog.push(new Date().toLocaleTimeString() + ': ' + message);
-      if (debugLog.length > maxLogs) {
-        debugLog.shift();
-      }
-      updateDebugPanel();
-      console.log(...args);
-    }
-
-    // Define a mapping of QR code text values to 3D models
     const modelMapping = {
-      'box': './Box.gltf',
-      'cesium': './CesiumMan.gltf'
+      'box': { 'model_obj_path': 'wireless1.obj', 'model_mtl_path': '', 'sound_path': 'VO_Wireless.mp3' },
+      'cesium': { 'model_obj_path': 'wireless1.obj', 'model_mtl_path': 'wireless1.mtl', 'sound_path': 'flute.mp3' },
     };
 
-    // Initialize QR scanner after page loads
     window.onload = function () {
       const html5QrCode = new Html5Qrcode("qr-reader");
       const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
@@ -69,18 +65,13 @@
         { facingMode: "environment" },
         qrConfig,
         (decodedText) => {
-          // Update current QR value when new code is scanned
           if (modelMapping.hasOwnProperty(decodedText.toLowerCase())) {
             currentQrValue = decodedText.toLowerCase();
-            // customLog('New QR code detected:', currentQrValue);
 
-            // Update the marker's value attribute
-            const marker = document.querySelector('a-marker');
+            const marker = document.querySelector('a-marker-camera');
             marker.setAttribute('value', currentQrValue);
-            customLog('a-marker value = :', marker.getAttribute('value'));
 
-            // Trigger model update
-            updateModel(currentQrValue);
+            (async () => await updateModel(currentQrValue))();
           }
         },
         (error) => {
@@ -89,47 +80,75 @@
       );
     };
 
-    function updateModel(value) {
-      const modelPath = modelMapping[value];
+    async function updateModel(value) {
+      const model = modelMapping[value];
+      const modelPath = model['model_mtl_path'] ? `obj: url(${model['model_obj_path']}); mtl: url(${model['model_mtl_path']})` : `obj: url(${model['model_obj_path']})`
+      const soundPath = model['sound_path']
+
       if (modelPath) {
+        await remove3dObject();
+        const modelEntity = document.querySelector('#ar-model');
+        const newModel = document.createElement('a-entity');
+        newModel.setAttribute('material', 'color: #dbcc8f');
+        newModel.setAttribute('scale', '0.1 0.2 0.3');
+        newModel.setAttribute('position', '0 0 0');
+        newModel.setAttribute('rotation', '0 0 0');
+        newModel.setAttribute('obj-model', modelPath);
+        newModel.setAttribute('sound', `src: url(${soundPath}); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000`);
+        modelEntity.appendChild(newModel);
+      }
+    }
+
+    const audioHandler = () => {
+      const modelEntity = document.querySelector('#ar-model');
+      const childEntity = modelEntity.firstChild;
+      return {
+        startAudio: () => {
+          if (childEntity && childEntity.nodeType === 1) {
+            childEntity.components.sound.playSound();
+          }
+        },
+        stopAudio: () => {
+          if (childEntity && childEntity.nodeType === 1) {
+            childEntity.components.sound.stopSound();
+          }
+        },
+        pauseAudio: () => {
+          if (childEntity && childEntity.nodeType === 1) {
+            childEntity.components.sound.pauseSound();
+          }
+        },
+      }
+    }
+
+    const remove3dObject = () => {
+      return new Promise((resolve) => {
         const modelEntity = document.querySelector('#ar-model');
         while (modelEntity.firstChild) {
           modelEntity.removeChild(modelEntity.firstChild);
         }
-        const newModel = document.createElement('a-entity');
-        newModel.setAttribute('gltf-model', modelPath);
-        newModel.setAttribute('scale', '1 2 1');
-        newModel.setAttribute('position', '0 0 0');
-        newModel.setAttribute('rotation', '0 0 0');
-        modelEntity.appendChild(newModel);
-        // customLog('Updated model to:', modelPath);
-      }
-    }
-
-    AFRAME.registerComponent('markerhandler', {
-      init: function () {
-        this.el.addEventListener('markerFound', () => {
-          customLog('Marker found, current QR value:', currentQrValue);
-          updateModel(currentQrValue);
-        });
-
-        this.el.addEventListener('markerLost', () => {
-          customLog('Marker lost');
-        });
-      }
-    });
+        resolve();
+      });
+    };
   </script>
 </head>
 
 <body style="margin: 0; overflow: hidden;">
-  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
-    <a-marker type="pattern" preset="custom" url="./pattern.patt" markerhandler>
-      <a-entity id="ar-model" position="0 0 0" rotation="0 0 0">
-      </a-entity>
-    </a-marker>
-    <a-entity camera></a-entity>
+  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' xr-mode-ui="enabled: false">
+    <a-marker-camera id="ar-model" type="pattern" preset="custom" url="./pattern.patt">
+    </a-marker-camera>
   </a-scene>
-  <div id="debugPanel"></div>
+  <div class="button-container">
+    <button id="start-audio" class="round-button" onclick="audioHandler().startAudio()"><img src="audio-start.svg"
+        alt="start audio" width="26px" height="auto"></button>
+    <button id="stop-audio" class="round-button" onclick="audioHandler().stopAudio()"><img src="audio-stop.svg"
+        alt="stop audio" width="26px" height="auto"></button>
+    <button id="pause-audio" class="round-button" onclick="audioHandler().pauseAudio()"><img src="audio-pause.svg"
+        alt="pause audio" width="26px" height="auto"></button>
+    <button id="remove-object-btn" class="round-button" onclick="remove3dObject()"
+      style="background-color: #b51b1b;"><img src="remove-object.svg" alt="pause audio" width="26px"
+        height="auto"></button>
+  </div>
   <div id="qr-reader"></div>
 </body>
 
