@@ -6,6 +6,8 @@
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script src="gesture-detector.js"></script>
+  <script src="gesture-handler.js"></script>
   <style>
     #qr-reader {
       position: fixed;
@@ -51,10 +53,12 @@
   </style>
   <script>
     let currentQrValue;
+    let newQrValue;
 
     const modelMapping = {
-      'box': { 'model_obj_path': 'wireless1.obj', 'model_mtl_path': '', 'sound_path': 'VO_Wireless.mp3' },
-      'cesium': { 'model_obj_path': 'wireless1.obj', 'model_mtl_path': 'wireless1.mtl', 'sound_path': 'flute.mp3' },
+      'armadillo': { 'model_obj_path': 'armadillo.obj', 'model_mtl_path': '', 'sound_path': 'armadillo.mp3' },
+      'cheburashka': { 'model_obj_path': 'nefertiti.obj', 'model_mtl_path': '', 'sound_path': 'nefertiti.mp3' },
+      'homer': { 'model_obj_path': 'xyzrgb_dragon.obj', 'model_mtl_path': '', 'sound_path': 'xyzrgb_dragon.mp3' },
     };
 
     window.onload = function () {
@@ -68,10 +72,13 @@
           if (modelMapping.hasOwnProperty(decodedText.toLowerCase())) {
             currentQrValue = decodedText.toLowerCase();
 
-            const marker = document.querySelector('a-marker-camera');
-            marker.setAttribute('value', currentQrValue);
-
-            (async () => await updateModel(currentQrValue))();
+            if (currentQrValue !== newQrValue) {
+              const marker = document.querySelector('a-marker-camera');
+              marker.setAttribute('value', currentQrValue);
+              
+              (async () => await updateModel(currentQrValue))();
+              newQrValue = currentQrValue
+            }
           }
         },
         (error) => {
@@ -87,21 +94,28 @@
 
       if (modelPath) {
         await remove3dObject();
-        const modelEntity = document.querySelector('#ar-model');
-        const newModel = document.createElement('a-entity');
-        newModel.setAttribute('material', 'color: #dbcc8f');
-        newModel.setAttribute('scale', '0.1 0.2 0.3');
-        newModel.setAttribute('position', '0 0 0');
-        newModel.setAttribute('rotation', '0 0 0');
-        newModel.setAttribute('obj-model', modelPath);
-        newModel.setAttribute('sound', `src: url(${soundPath}); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000`);
-        modelEntity.appendChild(newModel);
+        const entity = document.querySelector('#entity');
+        entity.setAttribute('material', 'color: #dbcc8f');
+        entity.setAttribute('position', '0 0 0');
+        entity.setAttribute('rotation', '0 0 0');
+        entity.setAttribute('obj-model', modelPath);
+        entity.setAttribute('sound', `src: url(${soundPath}); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000`);
+        entity.addEventListener('model-loaded', () => {
+          const bbox = new THREE.Box3().setFromObject(entity.object3D);
+
+          const size = bbox.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const targetSize = 1;
+
+          const scaleFactor = targetSize / maxDim;
+          entity.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
+        });
+        customLog('Updated model to:', modelPath, soundPath);
       }
     }
 
     const audioHandler = () => {
-      const modelEntity = document.querySelector('#ar-model');
-      const childEntity = modelEntity.firstChild;
+      const childEntity = document.querySelector('[sound]');
       return {
         startAudio: () => {
           if (childEntity && childEntity.nodeType === 1) {
@@ -123,10 +137,13 @@
 
     const remove3dObject = () => {
       return new Promise((resolve) => {
-        const modelEntity = document.querySelector('#ar-model');
-        while (modelEntity.firstChild) {
-          modelEntity.removeChild(modelEntity.firstChild);
-        }
+        const entity = document.querySelector('#entity')
+        entity.removeAttribute('obj-model');
+        entity.removeAttribute('sound');
+        entity.removeAttribute('scale')
+        entity.removeAttribute('position');
+        entity.removeAttribute('rotation');
+        newQrValue = ""
         resolve();
       });
     };
@@ -134,10 +151,15 @@
 </head>
 
 <body style="margin: 0; overflow: hidden;">
-  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' xr-mode-ui="enabled: false">
-    <a-marker-camera id="ar-model" type="pattern" preset="custom" url="./pattern.patt">
+
+  <a-scene arjs embedded renderer="logarithmicDepthBuffer: true;" xr-mode-ui="enabled: false" gesture-detector
+    id="scene">
+    <a-marker-camera id="ar-model" type="pattern" preset="custom" url="./pattern-mark.patt"
+      raycaster="objects: .clickable" emitevents="true" cursor="fuse: false; rayOrigin: mouse;">
+      <a-entity id="entity" class="clickable" gesture-handler></a-entity>
     </a-marker-camera>
   </a-scene>
+
   <div class="button-container">
     <button id="start-audio" class="round-button" onclick="audioHandler().startAudio()"><img src="audio-start.svg"
         alt="start audio" width="26px" height="auto"></button>
@@ -149,7 +171,9 @@
       style="background-color: #b51b1b;"><img src="remove-object.svg" alt="pause audio" width="26px"
         height="auto"></button>
   </div>
+
   <div id="qr-reader"></div>
+
 </body>
 
 </html>
