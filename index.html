@@ -95,21 +95,12 @@
       if (modelPath) {
         await remove3dObject();
         const entity = document.querySelector('#entity');
-        entity.setAttribute('material', 'color: #dbcc8f');
+        entity.setAttribute('material', 'color: #B66A50');
+        entity.setAttribute('scale', '0.01 0.01 0.01');
         entity.setAttribute('position', '0 0 0');
         entity.setAttribute('rotation', '0 0 0');
         entity.setAttribute('obj-model', modelPath);
         entity.setAttribute('sound', `src: url(${soundPath}); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000`);
-        entity.addEventListener('model-loaded', () => {
-          const bbox = new THREE.Box3().setFromObject(entity.object3D);
-
-          const size = bbox.getSize(new THREE.Vector3());
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const targetSize = 1;
-
-          const scaleFactor = targetSize / maxDim;
-          entity.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
-        });
         customLog('Updated model to:', modelPath, soundPath);
       }
     }
