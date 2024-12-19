@@ -12,7 +12,6 @@
       background-color: transparent;
       color: white;
       cursor: pointer;
-      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
       transition: transform 0.1s, background-color 0.3s;
       outline: none;
       -webkit-tap-highlight-color: transparent;
@@ -28,8 +27,8 @@
 
     .button-container {
       position: absolute;
-      top: 20px;
-      right: 10px;
+      top: 10px;
+      right: 5px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -45,10 +44,10 @@
 
     const audioHandler = () => {
       if (isNotMute()) {
-        icon().src = 'static/SoundOff.png';
+        icon().src = 'SoundOff.png';
         entity && entity.components.sound.pauseSound();
       } else {
-        icon().src = 'static/SoundOn.png';
+        icon().src = 'SoundOn.png';
         entity && entity.components.sound.playSound();
       }
     };
@@ -71,20 +70,24 @@
 
 <body style="margin: 0; overflow: hidden;">
 
-  <a-scene arjs embedded xr-mode-ui="enabled: false" id="scene" renderer="logarithmicDepthBuffer: true;">
+  <a-scene embedded
+    arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960;'
+    xr-mode-ui="enabled: false" id="scene" renderer='logarithmicDepthBuffer: true;'>
     <a-marker id="ar-model" type="pattern" preset="custom" url="./pattern-wireless-card.patt" smooth="true"
       smoothCount="10" smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_wireless.obj); mtl: url(resources/combined_wireless.mtl)"
-        sound="src: url(resources/VO_Wireless.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
+      <a-entity obj-model="obj: url(combined_wireless.obj); mtl: url(combined_wireless.mtl)"
+        sound="src: url(VO_Wireless.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
         scale="0.2 0.2 0.2">
       </a-entity>
     </a-marker>
+    <!-- Lighting -->
+    <a-light type="directional" position="2 4 10" intensity="1"></a-light>
     <a-entity camera></a-entity>
   </a-scene>
 
   <div class="button-container">
-    <button id="pause-audio" class="round-button" onclick="audioHandler()"><img id="audio-icon" src="static/SoundOn.png"
-        alt="audio icon" width="48px" height="auto"></button>
+    <button id="pause-audio" class="round-button" onclick="audioHandler()"><img id="audio-icon" src="SoundOn.png"
+        alt="pause audio" width="48px" height="auto"></button>
   </div>
 
 </body>
