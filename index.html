@@ -44,10 +44,10 @@
 
     const audioHandler = () => {
       if (isNotMute()) {
-        icon().src = 'SoundOff.png';
+        icon().src = 'static/SoundOff.png';
         entity && entity.components.sound.pauseSound();
       } else {
-        icon().src = 'SoundOn.png';
+        icon().src = 'static/SoundOn.png';
         entity && entity.components.sound.playSound();
       }
     };
@@ -75,8 +75,8 @@
     xr-mode-ui="enabled: false" id="scene" renderer='logarithmicDepthBuffer: true;'>
     <a-marker id="ar-model" type="pattern" preset="custom" url="./pattern-wireless-card.patt" smooth="true"
       smoothCount="10" smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(combined_wireless.obj); mtl: url(combined_wireless.mtl)"
-        sound="src: url(VO_Wireless.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
+      <a-entity obj-model="obj: url(resources/combined_wireless.obj); mtl: url(resources/combined_wireless.mtl)"
+        sound="src: url(resources/VO_Wireless.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
         scale="0.2 0.2 0.2">
       </a-entity>
     </a-marker>
@@ -86,7 +86,7 @@
   </a-scene>
 
   <div class="button-container">
-    <button id="pause-audio" class="round-button" onclick="audioHandler()"><img id="audio-icon" src="SoundOn.png"
+    <button id="pause-audio" class="round-button" onclick="audioHandler()"><img id="audio-icon" src="static/SoundOn.png"
         alt="pause audio" width="48px" height="auto"></button>
   </div>
 
