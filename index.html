@@ -2,161 +2,27 @@
 <html>
 
 <head>
-  <title>Web AR</title>
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-  <!-- <script src="gesture-detector.js"></script>
-  <script src="gesture-handler.js"></script> -->
-  <style>
-    .round-button {
-      border: none;
-      border-radius: 50%;
-      background-color: transparent;
-      color: white;
-      cursor: pointer;
-      transition: transform 0.1s, background-color 0.3s;
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .round-button:active {
-      transform: scale(0.9);
-    }
-
-    .round-button:focus {
-      outline: none;
-    }
-
-    .button-container {
-      position: absolute;
-      top: 10px;
-      right: 5px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-  </style>
-
-  <script>
-    let entity;
-
-    const icon = () => document.getElementById('audio-icon');
-
-    const isNotMute = () => icon().src.includes('SoundOn.png');
-
-    const audioHandler = () => {
-      if (isNotMute()) {
-        icon().src = 'static/SoundOff.png';
-        entity && entity.components.sound.pauseSound();
-      } else {
-        icon().src = 'static/SoundOn.png';
-        entity && entity.components.sound.playSound();
-      }
-    };
-
-    AFRAME.registerComponent('markerhandler', {
-      init: function () {
-        this.el.addEventListener('markerFound', () => {
-          entity = this.el.querySelector('a-entity');
-          isNotMute() && entity.components.sound.playSound();
-        });
-
-        this.el.addEventListener('markerLost', () => {
-          entity = this.el.querySelector('a-entity');
-          entity.components.sound.stopSound();
-        });
-      }
-    });
-  </script>
+  <title>AR.js A-Frame Location-based</title>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script type='text/javascript'
+    src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/three.js/build/ar-threex-location-only.js'></script>
+  <script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js'></script>
 </head>
 
-<body style="margin: 0; overflow: hidden;">
-
-  <a-scene embedded
-    arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960;'
-    xr-mode-ui="enabled: false" id="scene" renderer='logarithmicDepthBuffer: true;'>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-wireless-card.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_wireless.obj); mtl: url(resources/combined_wireless.mtl)"
-        sound="src: url(resources/VO_Wireless.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-graphics-card.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity
-        obj-model="obj: url(resources/combined_graphics_card.obj); mtl: url(resources/combined_graphics_card.mtl)"
-        sound="src: url(resources/VO_GraphicsCard.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-power-supply.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_psu.obj); mtl: url(resources/combined_psu.mtl)"
-        sound="src: url(resources/VO_PSU.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-cpu.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_cpu.obj); mtl: url(resources/combined_cpu.mtl)"
-        sound="src: url(resources/VO_CPU.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-solid-state-drive.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_ssd.obj); mtl: url(resources/combined_ssd.mtl)"
-        sound="src: url(resources/VO_SSD.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-random-access-memory.patt" smooth="true"
-      smoothCount="5" smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_ram.obj); mtl: url(resources/combined_ram.mtl)"
-        sound="src: url(resources/VO_RAM.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-read-only-memory.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_rom.obj); mtl: url(resources/combined_rom.mtl)"
-        sound="src: url(resources/VO_ROM.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-optical-drive.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_optical.obj); mtl: url(resources/combined_optical.mtl)"
-        sound="src: url(resources/VO_Optical.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-capture-card.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_capture_card.obj); mtl: url(resources/combined_capture_card.mtl)"
-        sound="src: url(resources/VO_Capture.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-    <a-marker type="pattern" preset="custom" url="patterns/pattern-hard-drive.patt" smooth="true" smoothCount="5"
-      smoothTolerance="0.005" smoothThreshold="1" markerhandler>
-      <a-entity obj-model="obj: url(resources/combined_hdd.obj); mtl: url(resources/combined_hdd.mtl)"
-        sound="src: url(resources/VO_HDD.mp3); autoplay: false; distanceModel: linear; rolloffFactor: 0; maxDistance: 10000"
-        scale="0.1 0.1 0.1">
-      </a-entity>
-    </a-marker>
-
-    <!-- Lighting -->
-    <a-light type="directional" position="2 4 10" intensity="1"></a-light>
-    <a-entity camera></a-entity>
+<body>
+  <a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false'
+    renderer='antialias: true; alpha: true'>
+    <a-camera gps-new-camera='gpsMinDistance: 5'></a-camera>
+    <!-- <a-entity material='color: red' geometry='primitive: box'
+      gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="30 30 30"></a-entity> -->
+    <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
+      gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="5 5 5" rotation="90 90 180"></a-entity>
+    <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
+      gps-new-entity-place="latitude: 24.936808183985114; longitude: 67.14753488835187" scale="1 1 1"
+      rotation="90 90 180"></a-entity>
+    <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
+      gps-new-entity-place="latitude: 24.936641; longitude: 67.147150" scale="5 5 5" rotation="90 90 180"></a-entity>
   </a-scene>
-
-  <div class="button-container">
-    <button id="pause-audio" class="round-button" onclick="audioHandler()"><img id="audio-icon" src="static/SoundOn.png"
-        alt="pause audio" width="48px" height="auto"></button>
-  </div>
-
 </body>
 
 </html>
