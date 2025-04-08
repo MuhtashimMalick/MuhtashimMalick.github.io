@@ -10,19 +10,30 @@
 </head>
 
 <body>
-  <a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false'
+  <a-scene vr-mode-ui='enabled: false'
+    arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960'
     renderer='antialias: true; alpha: true'>
-    <a-camera gps-new-camera='gpsMinDistance: 5'></a-camera>
+    <a-camera gps-new-camera='gpsMinDistance: 15; gpsTimeInterval: 2000; positionMinAccuracy: 50'
+      look-controls-enabled='false' arjs-device-orientation-controls='smoothingFactor: 0.1'>
+    </a-camera>
+
     <!-- <a-entity material='color: red' geometry='primitive: box'
       gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="30 30 30"></a-entity> -->
     <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
-      gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="5 5 5" rotation="90 90 180"></a-entity>
-    <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
+      gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="10 10 10" rotation="90 90 180"></a-entity>
+    <!-- <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
       gps-new-entity-place="latitude: 24.936808183985114; longitude: 67.14753488835187" scale="1 1 1"
       rotation="90 90 180"></a-entity>
     <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
-      gps-new-entity-place="latitude: 24.936641; longitude: 67.147150" scale="5 5 5" rotation="90 90 180"></a-entity>
+      gps-new-entity-place="latitude: 24.936641; longitude: 67.147150" scale="5 5 5" rotation="90 90 180"></a-entity> -->
   </a-scene>
 </body>
 
 </html>
+<!-- 24.9367947, 67.1475261
+24.936803196527983, 67.14784269635861 -->
+<!-- 24.936787081951234, 67.14747522615195 -->
+<!-- 24.936887662692058, 67.14741656078158 -->
+<!-- 24.936808183985114, 67.14753488835187 -->
+<!-- 24.936951, 67.148423  right view -->
+<!-- 24.936641, 67.147150 left view -->
