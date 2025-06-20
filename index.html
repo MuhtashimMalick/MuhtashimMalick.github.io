@@ -2,35 +2,205 @@
 <html>
 
 <head>
-  <title>AR.js A-Frame Location-based</title>
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script type='text/javascript'
-    src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/three.js/build/ar-threex-location-only.js'></script>
-  <script type='text/javascript' src='https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js'></script>
+  <title>Web AR</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="gesture-detector.js"></script>
+  <script src="gesture-handler.js"></script>
+  <style>
+    .button-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 1000;
+    }
+
+    .model-button {
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      min-width: 80px;
+    }
+
+    .model-button:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .model-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .model-button.active {
+      background-color: #FF6B35;
+    }
+
+    /* Loader Styles */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      transition: opacity 0.3s ease;
+    }
+
+    .loader-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-text {
+      color: white;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    .loader-subtext {
+      color: #ccc;
+      font-size: 14px;
+      margin-top: 10px;
+      font-family: Arial, sans-serif;
+    }
+  </style>
 </head>
 
-<body>
-  <a-scene vr-mode-ui='enabled: false'
-    arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960'
-    renderer='antialias: true; alpha: true'>
-    <a-camera gps-new-camera='gpsMinDistance: 15; gpsTimeInterval: 2000; positionMinAccuracy: 50'>
-    </a-camera>
+<body style="margin: 0; overflow: hidden;">
+  <!-- Loader Overlay -->
+  <div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+    <div class="loader-text">Loading 3D Model...</div>
+    <div class="loader-subtext">Please wait while the model loads</div>
+  </div>
 
-    <!-- <a-entity material='color: red' geometry='primitive: box'
-        gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="30 30 30"></a-entity> -->
-    <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
-      gps-new-entity-place="latitude: 24.936951; longitude: 67.148423" scale="10 10 10" rotation="90 90 180"></a-entity>
-    <!-- <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
-        gps-new-entity-place="latitude: 24.936808183985114; longitude: 67.14753488835187" scale="1 1 1"
-        rotation="90 90 180"></a-entity>
-      <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
-        gps-new-entity-place="latitude: 24.936641; longitude: 67.147150" scale="5 5 5" rotation="90 90 180"></a-entity> -->
-    <!-- <a-entity obj-model="obj: url(building/building-old.obj); mtl: url(building/building-old.mtl)"
-      gps-new-entity-place="latitude: 24.931786; longitude: 67.112791" scale="4 4 4" rotation="90 90 180"></a-entity> -->
-    <a-entity gltf-model="url(building/uploads_files_4048489_City+center+at+night+.glb)"
-      gps-new-entity-place="latitude: 24.931786; longitude: 67.112791" scale="2 2 2" rotation="0 0 0"></a-entity>
+  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' xr-mode-ui="enabled: false" id="scene"
+    renderer='logarithmicDepthBuffer: true;' gesture-detector>
+    <a-marker type="pattern" preset="hiro" smooth="true" smoothCount="5" smoothTolerance="0.005" smoothThreshold="1">
+      <a-entity id="model-entity" gesture-handler>
+      </a-entity>
+    </a-marker>
 
+    <!-- Lighting -->
+    <a-light type="directional" position="2 4 10" intensity="1"></a-light>
+    <a-entity camera></a-entity>
   </a-scene>
+
+  <div class="button-container">
+    <button class="model-button" onclick="switchModel('resources/restaurant/hamburger.glb', this)">🍔 Burger</button>
+    <button class="model-button" onclick="switchModel('resources/restaurant/pizza.glb', this)">🍕 Pizza</button>
+    <button class="model-button" onclick="switchModel('resources/restaurant/tin.glb', this)">🥤 Drink</button>
+  </div>
+
+  <script>
+    let currentModel = null;
+    let isLoading = false;
+
+    function showLoader() {
+      const loader = document.getElementById('loader');
+      loader.classList.remove('hidden');
+      isLoading = true;
+    }
+
+    function hideLoader() {
+      const loader = document.getElementById('loader');
+      loader.classList.add('hidden');
+      isLoading = false;
+    }
+
+    function switchModel(modelPath, buttonElement) {
+      if (isLoading) return; // Prevent multiple clicks while loading
+
+      const modelEntity = document.querySelector('#model-entity');
+
+      if (!modelEntity) {
+        console.error('Model entity not found');
+        return;
+      }
+
+      showLoader();
+
+      const allButtons = document.querySelectorAll('.model-button');
+      allButtons.forEach(btn => btn.classList.remove('active'));
+      buttonElement.classList.add('active');
+
+      if (currentModel) {
+        modelEntity.removeAttribute('gltf-model');
+        modelEntity.removeAttribute('obj-model');
+      }
+
+      const onModelLoaded = () => {
+        hideLoader();
+        modelEntity.removeEventListener('model-loaded', onModelLoaded);
+        modelEntity.removeEventListener('model-error', onModelError);
+        console.log('Model loaded successfully:', modelPath);
+      };
+
+      const onModelError = () => {
+        hideLoader();
+        modelEntity.removeEventListener('model-loaded', onModelLoaded);
+        modelEntity.removeEventListener('model-error', onModelError);
+        console.error('Failed to load model:', modelPath);
+        alert('Failed to load 3D model. Please check if the file exists.');
+      };
+
+      modelEntity.addEventListener('model-loaded', onModelLoaded);
+      modelEntity.addEventListener('model-error', onModelError);
+
+      modelEntity.setAttribute('gltf-model', modelPath);
+      currentModel = modelPath;
+
+      setTimeout(() => {
+        if (isLoading) {
+          hideLoader();
+          console.warn('Loader hidden due to timeout');
+        }
+      }, 10000);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(hideLoader, 500);
+    });
+  </script>
+
 </body>
 
 </html>
